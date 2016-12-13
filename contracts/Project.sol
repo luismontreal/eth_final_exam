@@ -8,6 +8,7 @@ contract Project {
 	enum StatusType {Active, Refund, Achieved, PaidOut}
 	StatusType private status;
 
+    //Defines project info
 	struct projectInfo{
 		address owner;
 		uint amountGoalInWei;
@@ -16,25 +17,30 @@ contract Project {
 
 	projectInfo private pi;
 
+    //Defines a contribution
 	struct contribution {
 	    uint amountOfContribution;
 	    bool isRefunded;
 	}
-
+    //Stores a map of addresses (contributors) to contribution defined above
 	mapping(address => contribution) private contributionRecord;
+	//We track the number of contributions
 	uint private numOfContributions;
 
+    //Constructor
 	function Project (uint amount, uint deadline) {
+	    //We init some vars
 	    fundingHub = msg.sender;
 	    totalContributed = 0;
 	    numOfContributions = 0;
 	    status = StatusType.Active;
-
+        //Project info
 	    pi.owner = tx.origin;
 	    pi.amountGoalInWei = amount;
 	    pi.deadline = deadline;
 	}
 
+    //Fund function can only be called from fundingHub
 	function fund(uint amount)
 	    fromFundingHub
 	    returns (bool result, StatusType status) {
@@ -56,10 +62,12 @@ contract Project {
         totalContributed += amount;
 	    numOfContributions++;
 
+        //Did we achieve the goal in Wei?
 	    if(totalContributed >= pi.amountGoalInWei) {
             status = StatusType.Achieved;
 	    }
 
+        //The contribution was successfully placed
 	    return (true, status);
 
 	}
