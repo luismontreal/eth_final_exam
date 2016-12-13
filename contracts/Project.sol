@@ -36,7 +36,7 @@ contract Project {
 	        return (false, status);
 	    }
 
-	    //We check if deadline was met
+	    //We check if it's not in refund status
 	    if (getStatus() == ProjectLib.StatusType.Refund) {
 	        status = ProjectLib.StatusType.Refund;
 	        return (false, status);
@@ -53,15 +53,15 @@ contract Project {
 
         //The contribution was successfully placed
 	    return (true, status);
-
 	}
+
     //It's meant to be a 1 time payout
 	function payout()
 	    fromOwner
 	    returns (bool result) {
 
 	    //If the amount goal hans't been achieved then return false
-	    if(status == ProjectLib.StatusType.Achieved) {
+	    if(getStatus() != ProjectLib.StatusType.Achieved) {
 	        return false;
 	    }
 
@@ -79,6 +79,7 @@ contract Project {
 
 	function refund()
 	    returns (bool result) {
+	    //Here we can only check if deadline is met, the goal wasn't achieved and we haven't payout
 	    if (getStatus() != ProjectLib.StatusType.Refund) {
 	        throw;
 	    }
@@ -104,7 +105,8 @@ contract Project {
 
     }
 
-    //Constant Function so FundingHub can know the status without making a transaction
+    //Constant Function so FundingHub can know the status at all time without making a transaction to persist "status"
+    //I base the funtion on the Project life cycle
     function getStatus()
             constant
     	    returns (ProjectLib.StatusType status) {
@@ -113,12 +115,13 @@ contract Project {
     	        return ProjectLib.StatusType.PaidOut;
     	    }
             //If we haven't payout and the balance surpasses the goal, then the status is always "Achieved", regardless of the deadline
-            if(this.balance >= pi.amountGoalInWei) {
+            if(status == ProjectLib.StatusType.Achieved || this.balance >= pi.amountGoalInWei) {
                 return ProjectLib.StatusType.Achieved;
             }
             //If we already processed refunds OR
-            //deadline is met and we have funds then keep this status
-    	    if (status == ProjectLib.StatusType.Refund || pi.deadline <= now && this.balance > 0) {
+            //deadline is met
+            //At this point I know we haven't paid nor achieved the goal
+    	    if (status == ProjectLib.StatusType.Refund || pi.deadline <= now) {
                 return ProjectLib.StatusType.Refund;
             }
             //Here I know for sure the status is still Active
