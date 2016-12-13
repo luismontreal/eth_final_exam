@@ -1,30 +1,31 @@
 pragma solidity ^0.4.6;
-import "ProjectLib.sol";
 import "Project.sol";
 
 contract FundingHub {
+    // Simple mapping to track deployed projects
+    mapping(uint => Project) private deployedProjects;
+    uint private numOfProjects;
 
-    mapping(uint => Project) deployedProjects;
-    uint numOfProjects;
-
-    // Define events
+    // Define events for the web page
     event OnCreatedProject(address indexed projectOwner, address indexed projectAddress);
-    event OnContribution(address contributor, address projectAddress, bool result, ProjectLib.StatusType status);
+    event OnContribution(address contributor, address projectAddress, bool result);
 
     function FundingHub() {
-
+        // What do I do here?
     }
 
-    function createProject(uint amount, uint deadline) {
-        deployedProjects[numOfProjects] = new Project(amount, deadline);
+    // Deploys a new "Project" and we save the address
+    function createProject(uint amountGoal, uint deadline) {
+        deployedProjects[numOfProjects] = new Project(amountGoal, deadline);
         numOfProjects++;
         OnCreatedProject(tx.origin, deployedProjects[numOfProjects]);
     }
-
-    function contribute(address a, uint amount) {
+    //Calls Project.fund() which returns whether or not the deposit was succeful and its status
+    //Only FindingHub can call Project.fund()
+    function contribute(address a) {
         Project p = Project(a);
-        var (result, status) = p.fund(amount);
-        OnContribution(tx.origin, a, result, status);
+        bool result = p.fund.value(msg.value);
+        OnContribution(tx.origin, a, result);
     }
 
 }

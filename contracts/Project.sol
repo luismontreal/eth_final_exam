@@ -27,23 +27,23 @@ contract Project {
 	}
 
     //Fund function can only be called from fundingHub
-	function fund(uint amount)
+	function fund()
 	    fromFundingHub
 	    payable
-	    returns (bool result, ProjectLib.StatusType status) {
+	    returns (bool result) {
         //We return false if project is no longer active
 	    if (status != ProjectLib.StatusType.Active) {
-	        return (false, status);
+	        return false;
 	    }
 
 	    //We check if it's not in refund status
 	    if (getStatus() == ProjectLib.StatusType.Refund) {
 	        status = ProjectLib.StatusType.Refund;
-	        return (false, status);
+	        return false;
 	    }
 
 	    //If we made it here is because contribution is still Active
-        contributionRecord[tx.origin] = amount;
+        contributionRecord[tx.origin] = msg.value;
 	    numOfContributions++;
 
         //Did we achieve the goal in Wei?
@@ -52,10 +52,10 @@ contract Project {
 	    }
 
         //The contribution was successfully placed
-	    return (true, status);
+	    return true;
 	}
 
-    //It's meant to be a 1 time payout
+    //It's meant to be a 1 time payout, I don't selfdestruct the contract
 	function payout()
 	    fromOwner
 	    returns (bool result) {
