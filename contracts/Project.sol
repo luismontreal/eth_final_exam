@@ -7,11 +7,11 @@ contract Project {
     //Next two are defined from library
 	ProjectLib.StatusType private status;
 	ProjectLib.projectInfo private pi;
+	//We track the number of contributions
+	uint private numOfContributions;
 
     //Stores a map of addresses (contributors) to amount contributed
 	mapping(address => uint) private contributionRecord;
-	//We track the number of contributions
-	uint private numOfContributions;
 
     //Constructor
 	function Project (uint amount, uint deadline) {
@@ -102,7 +102,6 @@ contract Project {
         }
 
         return false;
-
     }
 
     //Constant Function so FundingHub can know the status at all time without making a transaction to persist "status"
@@ -126,8 +125,6 @@ contract Project {
             }
             //Here I know for sure the status is still Active
             return ProjectLib.StatusType.Active;
-
-
     }
 
     //Defining fallback, contract not meant to receive ether directly, only from fund()
