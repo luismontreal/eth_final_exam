@@ -44,7 +44,7 @@ contract Project {
 	    }
 
 	    //We check if deadline was met
-	    if (pi.deadline >= now) {
+	    if (pi.deadline <= now) {
 	        status = StatusType.Refund;
 	        return (false, status);
 	    }
