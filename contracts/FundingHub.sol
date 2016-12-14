@@ -22,9 +22,9 @@ contract FundingHub {
     }
     //Calls Project.fund() which returns whether or not the deposit was succeful and its status
     //Only FindingHub can call Project.fund()
-    function contribute(address a) {
+    function contribute(address a) payable {
         Project p = Project(a);
-        bool result = p.fund.value(msg.value);
+        var result = p.fund.value(msg.value)();
         OnContribution(tx.origin, a, result);
     }
 
