@@ -8632,11 +8632,11 @@ var SolidityEvent = require("web3/lib/web3/event.js");
 },{"web3":177,"web3/lib/web3/event.js":204}],7:[function(require,module,exports){
 module.exports = {
   "ConvertLib": require("/home/luigi/www/vagrant-dev/public/ethereum/eth_final_exam/build/contracts/ConvertLib.sol.js"),
-  "Project": require("/home/luigi/www/vagrant-dev/public/ethereum/eth_final_exam/build/contracts/Project.sol.js"),
   "FundingHub": require("/home/luigi/www/vagrant-dev/public/ethereum/eth_final_exam/build/contracts/FundingHub.sol.js"),
-  "ProjectLib": require("/home/luigi/www/vagrant-dev/public/ethereum/eth_final_exam/build/contracts/ProjectLib.sol.js"),
   "Migrations": require("/home/luigi/www/vagrant-dev/public/ethereum/eth_final_exam/build/contracts/Migrations.sol.js"),
   "MetaCoin": require("/home/luigi/www/vagrant-dev/public/ethereum/eth_final_exam/build/contracts/MetaCoin.sol.js"),
+  "ProjectLib": require("/home/luigi/www/vagrant-dev/public/ethereum/eth_final_exam/build/contracts/ProjectLib.sol.js"),
+  "Project": require("/home/luigi/www/vagrant-dev/public/ethereum/eth_final_exam/build/contracts/Project.sol.js"),
 };
 },{"/home/luigi/www/vagrant-dev/public/ethereum/eth_final_exam/build/contracts/ConvertLib.sol.js":1,"/home/luigi/www/vagrant-dev/public/ethereum/eth_final_exam/build/contracts/FundingHub.sol.js":2,"/home/luigi/www/vagrant-dev/public/ethereum/eth_final_exam/build/contracts/MetaCoin.sol.js":3,"/home/luigi/www/vagrant-dev/public/ethereum/eth_final_exam/build/contracts/Migrations.sol.js":4,"/home/luigi/www/vagrant-dev/public/ethereum/eth_final_exam/build/contracts/Project.sol.js":5,"/home/luigi/www/vagrant-dev/public/ethereum/eth_final_exam/build/contracts/ProjectLib.sol.js":6}],8:[function(require,module,exports){
 var asn1 = exports;
@@ -45672,7 +45672,7 @@ window.addEventListener('load', function() {
 
                                                                 
 
-  [ConvertLib,FundingHub,MetaCoin,Migrations,Project,ProjectLib].forEach(function(contract) {         
+  [ConvertLib,FundingHub,MetaCoin,Project,Migrations,ProjectLib].forEach(function(contract) {         
 
     contract.setProvider(window.web3.currentProvider);          
 
@@ -45686,6 +45686,7 @@ window.addEventListener('load', function() {
 
 var accounts;
 var account;
+var allProjects = [];
 
 var initUtils = function (web3) {
 
@@ -45734,14 +45735,43 @@ function testing() {
           //console.log(receipt);
       });
 
-    fh.getProject.call(0).then(function(a){
-        console.log(a[0]);
-        console.log(a[1].valueOf());
-    });
 
-    fh.getProjectCount.call().then(function(numOfProjects){
-        console.log(numOfProjects.valueOf());
-    });
+
+
+    /*fh.getProjectCount.call().then(function(numOfProjects) {
+        var totalProjects = [];
+        for(i = 0; i < numOfProjects.valueOf(); i++) {
+            fh.getProject.call(i).then(function(a){
+                totalProjects[i] = {address: a[0], status: a[1]};
+                console.log(totalProjects[i]);
+            });
+        }
+    });*/
+
+    getListOfProjects = function() {
+
+        fh.getProjectCount.call()
+            .then(function (count) {
+                if (count.valueOf() > 0) {
+                    for (var i = 0; i < count.valueOf(); i++) {
+                        fh.getProject.call(i)
+                            .then(function (values) {
+                                        allProjects.push({
+                                                address: values[0],
+                                                status: values[1]
+                                            });
+                            })
+                            .catch(function (e) {
+                                console.error(e);
+                            });
+                    }
+                }
+            });
+
+    };
+    getListOfProjects();
+    console.log(allProjects);
+
 
     /*fh.getProject.call(1).then(function(a, status){
       console.log(a);

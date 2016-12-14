@@ -1,5 +1,6 @@
 var accounts;
 var account;
+var allProjects = [];
 
 var initUtils = function (web3) {
 
@@ -29,6 +30,29 @@ var initUtils = function (web3) {
 
 };
 
+
+//Gets and displays available projects in the contract
+getListOfProjects = function() {
+    FundingHub.deployed().getProjectCount.call()
+        .then(function (count) {
+            if (count.valueOf() > 0) {
+                for (var i = 0; i < count.valueOf(); i++) {
+                    FundingHub.deployed().getProject.call(i)
+                        .then(function (values) {
+                            allProjects.push({
+                                address: values[0],
+                                status: values[1]
+                            });
+                        })
+                        .catch(function (e) {
+                            console.error(e);
+                        });
+                }
+            }
+        });
+
+};
+
 function setStatus(message) {
   var status = document.getElementById("status");
   status.innerHTML = message;
@@ -48,14 +72,19 @@ function testing() {
           //console.log(receipt);
       });
 
-    fh.getProject.call(0).then(function(a){
-        console.log(a[0]);
-        console.log(a[1].valueOf());
-    });
 
-    fh.getProjectCount.call().then(function(numOfProjects){
-        console.log(numOfProjects.valueOf());
-    });
+
+
+    /*fh.getProjectCount.call().then(function(numOfProjects) {
+        var totalProjects = [];
+        for(i = 0; i < numOfProjects.valueOf(); i++) {
+            fh.getProject.call(i).then(function(a){
+                totalProjects[i] = {address: a[0], status: a[1]};
+                console.log(totalProjects[i]);
+            });
+        }
+    });*/
+
 
     /*fh.getProject.call(1).then(function(a, status){
       console.log(a);
@@ -111,6 +140,7 @@ window.onload = function() {
     accounts = accs;
     account = accounts[0];
 
+    getListOfProjects();
     testing();
   });
 }
