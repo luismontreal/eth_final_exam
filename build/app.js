@@ -8632,8 +8632,8 @@ var SolidityEvent = require("web3/lib/web3/event.js");
 },{"web3":177,"web3/lib/web3/event.js":204}],7:[function(require,module,exports){
 module.exports = {
   "ConvertLib": require("/home/luigi/www/vagrant-dev/public/ethereum/eth_final_exam/build/contracts/ConvertLib.sol.js"),
-  "FundingHub": require("/home/luigi/www/vagrant-dev/public/ethereum/eth_final_exam/build/contracts/FundingHub.sol.js"),
   "MetaCoin": require("/home/luigi/www/vagrant-dev/public/ethereum/eth_final_exam/build/contracts/MetaCoin.sol.js"),
+  "FundingHub": require("/home/luigi/www/vagrant-dev/public/ethereum/eth_final_exam/build/contracts/FundingHub.sol.js"),
   "Migrations": require("/home/luigi/www/vagrant-dev/public/ethereum/eth_final_exam/build/contracts/Migrations.sol.js"),
   "Project": require("/home/luigi/www/vagrant-dev/public/ethereum/eth_final_exam/build/contracts/Project.sol.js"),
   "ProjectLib": require("/home/luigi/www/vagrant-dev/public/ethereum/eth_final_exam/build/contracts/ProjectLib.sol.js"),
@@ -45731,7 +45731,7 @@ getListOfProjects = function() {
                 for (var i = 0; i < count.valueOf(); i++) {
                     FundingHub.deployed().getProject.call(i)
                         .then(function (values) {
-                            allProjects.push({
+                            allProjects.push ({
                                 address: values[0],
                                 status: values[1]
                             });
@@ -45741,7 +45741,10 @@ getListOfProjects = function() {
                         });
                 }
             }
-        });
+            return allProjects;
+        }).then(function (allProjects) {
+            console.log(allProjects);
+    })
 };
 
 createProject = function(amount, deadline) {
@@ -45749,7 +45752,15 @@ createProject = function(amount, deadline) {
         .then(function (tx) {
             return web3.eth.getTransactionReceiptMined(tx);
     }).then(function (receipt) {
-        setStatus(receipt);
+        setStatus('Transaction Hash:' + receipt.transactionHash);
+        filter = web3.eth.filter("pending");
+        var onCreatedProject = FundingHub.deployed().OnCreatedProject({projectOwner: account}, filter);
+
+        onCreatedProject.watch(function(error, result) {
+            if (!error) {
+                setStatus(result.args.projectOwner + ' created project with address ' + result.args.projectAddress);
+            }
+        });
 
     });
 };
@@ -45792,35 +45803,6 @@ function testing() {
 
 }
 
-/*function refreshBalance() {
-  var meta = MetaCoin.deployed();
-
-  meta.getBalance.call(account, {from: account}).then(function(value) {
-    var balance_element = document.getElementById("balance");
-    balance_element.innerHTML = value.valueOf();
-  }).catch(function(e) {
-    console.log(e);
-    setStatus("Error getting balance; see log.");
-  });
-};
-
-function sendCoin() {
-  var meta = MetaCoin.deployed();
-
-  var amount = parseInt(document.getElementById("amount").value);
-  var receiver = document.getElementById("receiver").value;
-
-  setStatus("Initiating transaction... (please wait)");
-
-  meta.sendCoin(receiver, amount, {from: account}).then(function() {
-    setStatus("Transaction complete!");
-    refreshBalance();
-  }).catch(function(e) {
-    console.log(e);
-    setStatus("Error sending coin; see log.");
-  });
-};*/
-
 //
 window.onload = function() {
     initUtils(web3);
@@ -45838,16 +45820,7 @@ window.onload = function() {
     accounts = accs;
     account = accounts[0];
 
-      //My events
-      // I only want to get project created from current user
-      var onCreatedProject = FundingHub.deployed().OnCreatedProject({projectOwner: account});
-
-      onCreatedProject.watch(function(error, result) {
-          if (!error)
-              console.log(result);
-      });
-
-      getListOfProjects();
-      testing();
+    getListOfProjects();
+    //testing();
   });
 }
