@@ -31,10 +31,16 @@ var initUtils = function (web3) {
 };
 
 
+function setStatus(message) {
+    var status = document.getElementById("status");
+    status.innerHTML = message;
+};
+
 //Gets and displays available projects in the contract
 getListOfProjects = function() {
     FundingHub.deployed().getProjectCount.call()
         .then(function (count) {
+            console.log(count.valueOf());
             if (count.valueOf() > 0) {
                 for (var i = 0; i < count.valueOf(); i++) {
                     FundingHub.deployed().getProject.call(i)
@@ -50,28 +56,34 @@ getListOfProjects = function() {
                 }
             }
         });
-
 };
 
-function setStatus(message) {
-  var status = document.getElementById("status");
-  status.innerHTML = message;
+createProject = function(amount, deadline) {
+    FundingHub.deployed().createProject(amount, deadline, { from: account, gas: 3000000 })
+        .then(function (tx) {
+            return web3.eth.getTransactionReceiptMined(tx);
+    }).then(function (receipt) {
+        setStatus(receipt);
+
+    });
 };
+
+
 
 function testing() {
-  balance = web3.fromWei(web3.eth.getBalance(account), "ether");
+  //balance = web3.fromWei(web3.eth.getBalance(account), "ether");
   //console.log(balance.plus(21).toString(10));
 
-  var fh = FundingHub.deployed();
+  //var fh = FundingHub.deployed();
 
-  //console.log(fh);
+    createProject(500000, 1640995200);
 
-  fh.createProject(500000, 1640995200, { from: account, gas: 3000000 }).then(function (tx) {
+  /*fh.createProject(500000, 1640995200, { from: account, gas: 3000000 }).then(function (tx) {
       return web3.eth.getTransactionReceiptMined(tx);
   }).then(function (receipt) {
           //console.log(receipt);
       });
-
+*/
 
 
 
@@ -140,7 +152,16 @@ window.onload = function() {
     accounts = accs;
     account = accounts[0];
 
-    getListOfProjects();
-    testing();
+      //My events
+      // I only want to get project created from current user
+      var onCreatedProject = FundingHub.deployed().OnCreatedProject({projectOwner: account});
+
+      onCreatedProject.watch(function(error, result) {
+          if (!error)
+              console.log(result);
+      });
+
+      getListOfProjects();
+      testing();
   });
 }

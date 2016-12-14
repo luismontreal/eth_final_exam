@@ -18,8 +18,8 @@ contract FundingHub {
     // The transaction originator will be the owner
     function createProject(uint amountGoal, uint deadline) {
         deployedProjects[numOfProjects] = new Project(amountGoal, deadline);
-        numOfProjects++;
         OnCreatedProject(tx.origin, deployedProjects[numOfProjects]);
+        numOfProjects++;
     }
     //Calls Project.fund() which returns whether or not the deposit was successful and its status
     //Only FindingHub can call Project.fund()
