@@ -21,7 +21,7 @@ contract FundingHub {
         numOfProjects++;
         OnCreatedProject(tx.origin, deployedProjects[numOfProjects]);
     }
-    //Calls Project.fund() which returns whether or not the deposit was succeful and its status
+    //Calls Project.fund() which returns whether or not the deposit was successful and its status
     //Only FindingHub can call Project.fund()
     function contribute(address a) payable returns (bool){
         Project p = Project(a);
@@ -44,7 +44,7 @@ contract FundingHub {
         constant
         returns (address a, ProjectLib.StatusType status) {
         Project p = deployedProjects[id];
-        return (a, p.getStatus());
+        return (p, p.getStatus());
     }
 
 }
