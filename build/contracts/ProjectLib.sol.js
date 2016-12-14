@@ -231,13 +231,13 @@ var SolidityEvent = require("web3/lib/web3/event.js");
 
   Contract.new = function() {
     if (this.currentProvider == null) {
-      throw new Error("ConvertLib error: Please call setProvider() first before calling new().");
+      throw new Error("ProjectLib error: Please call setProvider() first before calling new().");
     }
 
     var args = Array.prototype.slice.call(arguments);
 
     if (!this.unlinked_binary) {
-      throw new Error("ConvertLib error: contract binary not set. Can't deploy new instance.");
+      throw new Error("ProjectLib error: contract binary not set. Can't deploy new instance.");
     }
 
     var regex = /__[^_]+_+/g;
@@ -256,7 +256,7 @@ var SolidityEvent = require("web3/lib/web3/event.js");
         return name != arr[index + 1];
       }).join(", ");
 
-      throw new Error("ConvertLib contains unresolved libraries. You must deploy and link the following libraries before you can deploy a new version of ConvertLib: " + unlinked_libraries);
+      throw new Error("ProjectLib contains unresolved libraries. You must deploy and link the following libraries before you can deploy a new version of ProjectLib: " + unlinked_libraries);
     }
 
     var self = this;
@@ -297,7 +297,7 @@ var SolidityEvent = require("web3/lib/web3/event.js");
 
   Contract.at = function(address) {
     if (address == null || typeof address != "string" || address.length != 42) {
-      throw new Error("Invalid address passed to ConvertLib.at(): " + address);
+      throw new Error("Invalid address passed to ProjectLib.at(): " + address);
     }
 
     var contract_class = this.web3.eth.contract(this.abi);
@@ -308,7 +308,7 @@ var SolidityEvent = require("web3/lib/web3/event.js");
 
   Contract.deployed = function() {
     if (!this.address) {
-      throw new Error("Cannot find deployed address: ConvertLib not deployed or address not set.");
+      throw new Error("Cannot find deployed address: ProjectLib not deployed or address not set.");
     }
 
     return this.at(this.address);
@@ -348,35 +348,11 @@ var SolidityEvent = require("web3/lib/web3/event.js");
 
   Contract.all_networks = {
   "default": {
-    "abi": [
-      {
-        "constant": false,
-        "inputs": [
-          {
-            "name": "amount",
-            "type": "uint256"
-          },
-          {
-            "name": "conversionRate",
-            "type": "uint256"
-          }
-        ],
-        "name": "convert",
-        "outputs": [
-          {
-            "name": "convertedAmount",
-            "type": "uint256"
-          }
-        ],
-        "payable": false,
-        "type": "function"
-      }
-    ],
-    "unlinked_binary": "0x6060604052346000575b604c8060156000396000f36504062dabbdf050606060405260e060020a600035046396e4ee3d81146024575b6000565b60306004356024356042565b60408051918252519081900360200190f35b8181025b9291505056",
+    "abi": [],
+    "unlinked_binary": "0x6060604052346000575b60118060156000396000f36504062dabbdf05060606040525b600056",
     "events": {},
-    "updated_at": 1481731950201,
-    "links": {},
-    "address": "0x537a45a2b650fe18a7157da536d879d8c58e38ac"
+    "updated_at": 1481731950216,
+    "links": {}
   }
 };
 
@@ -461,7 +437,7 @@ var SolidityEvent = require("web3/lib/web3/event.js");
     Contract.links[name] = address;
   };
 
-  Contract.contract_name   = Contract.prototype.contract_name   = "ConvertLib";
+  Contract.contract_name   = Contract.prototype.contract_name   = "ProjectLib";
   Contract.generated_with  = Contract.prototype.generated_with  = "3.2.0";
 
   // Allow people to opt-in to breaking changes now.
@@ -501,6 +477,6 @@ var SolidityEvent = require("web3/lib/web3/event.js");
   } else {
     // There will only be one version of this contract in the browser,
     // and we can use that.
-    window.ConvertLib = Contract;
+    window.ProjectLib = Contract;
   }
 })();
