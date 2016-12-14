@@ -4,7 +4,7 @@ import "ProjectLib.sol";
 contract Project {
     //Tracks the address of the creator contract
 	address private fundingHub;
-    //Next two are defined from library
+    //Next two are defined in library
 	ProjectLib.StatusType private status;
 	ProjectLib.projectInfo private pi;
 	//We track the number of contributions
@@ -19,6 +19,7 @@ contract Project {
 	    fundingHub = msg.sender;
 	    //this is already set to 0 by the compiler but I prefer to see it here
 	    numOfContributions = 0;
+        //Whe start with the status Active
 	    status = ProjectLib.StatusType.Active;
         //Project info
 	    pi.owner = tx.origin;
@@ -31,14 +32,8 @@ contract Project {
 	    fromFundingHub
 	    payable
 	    returns (bool result) {
-        //We return false if project is no longer active
-	    if (status != ProjectLib.StatusType.Active) {
-	        return false;
-	    }
-
-	    //We check if it's not in refund status
-	    if (getStatus() == ProjectLib.StatusType.Refund) {
-	        status = ProjectLib.StatusType.Refund;
+        //This check is now redudant as FundingHub makes the same check, I will reconsider the right location
+	    if (getStatus() != ProjectLib.StatusType.Active) {
 	        return false;
 	    }
 
@@ -127,7 +122,7 @@ contract Project {
             return ProjectLib.StatusType.Active;
     }
 
-    //Defining fallback, contract not meant to receive ether directly, only from fund()
+    //Defining fallback, contract not meant to receive ether here, only from fund()
     function() {}
 
     //We allow fund() to be called only from fundingHub
