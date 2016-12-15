@@ -8,7 +8,7 @@ Student: Luis Alejandro Vega Lozano
 * `Truffle` - 2.1.1
 
 ## Project Link
-* [https://github.com/luismontreal/eth_final_exam]()
+* [https://github.com/luismontreal/eth_final_exam]
 
 ##IMPORTANT CONSIDERATIONS
 * For Unit Testing to work you need to run TESTRPC with the param --blocktime=1 so it actually mines blocks.
