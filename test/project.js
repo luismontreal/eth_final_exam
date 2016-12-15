@@ -61,8 +61,8 @@ contract('Project', function(accounts) {
 
     });
 
-    //I create a project in the past with no balance
-    it("Should refund only if address had contributed and there's available balance", function() {
+    //I create a project in the past with no balance, ID 1
+    it("Should fail id sender hasn't contributed or there's no balance", function(done) {
         var fh = FundingHub.deployed();
         blockNumber = web3.eth.blockNumber + 1;
         //Creating project in the past (to test refund), this is ID 1
@@ -74,9 +74,51 @@ contract('Project', function(accounts) {
             .then(function (e){
                 return Project.at(e[0][0].args.projectAddress).refund.call()
                     .then(function(success){
-                        assert.equal(success, false,"Contract has no balance nor contributors");
+                       assert.equal(success, false,"Contract has no balance nor contributors");
+                        done();
                     });
             });
+
+    });
+
+    //Create project for a short period of time, and contribute to it so we can test refunds in the last one
+    //ID 2, to be used in next test
+    it("Should be able contribute", function(done) {
+        var fh = FundingHub.deployed();
+        blockNumber = web3.eth.blockNumber;
+        console.log(web3.eth.getBlock('latest').timestamp + 4);
+
+        fh.createProject(1000, web3.eth.getBlock('latest').timestamp + 15, {gas: 3000000 })
+            .then(function(tx) {
+                return Promise.all([
+                    getEventsPromise(fh.OnCreatedProject({projectOwner: accounts[0]}))
+                ]);
+            })
+            .then(function (e) {
+                 return FundingHub.deployed().contribute.call(e[0][0].args.projectAddress, {from: accounts[0], value: 50,gas:3000000})
+            })
+            .then(function(success) {
+                assert.equal(success, true, "Can contribute");
+        });
+    });
+
+    it("Should be able to get refunded", function(done) {
+        var fh = FundingHub.deployed();
+        console.log(web3.eth.getBlock('latest').timestamp);
+        //console.log(Math.round(new Date().getTime()/1000));
+
+        fh.getProject.call(1)
+            .then(function (values) {
+                return Project.at(values[0]);
+            }).then(function (activeProject) {
+            return activeProject.refund.call()
+                .then(function(success){
+                    assert.equal(success, true,"Was refunded");
+                    //Wait some time before next test
+                    setTimeout(done, 60000);
+                });
+        });
+
 
     });
 });

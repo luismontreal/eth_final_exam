@@ -97,8 +97,7 @@ getListOfProjects = function() {
 
 //Creates new project
 createProject = function(amount, deadline) {
-    //I'm aware that getting timestamp from JS is a bad idea
-    deadlineTimeStamp = Math.floor((new Date()).getTime() / 1000) + (86400 * deadline);
+    deadlineTimeStamp = Math.floor(Math.round(new Date().getTime()/1000) + (86400 * deadline));
     FundingHub.deployed().createProject(amount, deadlineTimeStamp, { from: account, gas: 3000000 })
         .then(function (tx) {
             return web3.eth.getTransactionReceiptMined(tx);
