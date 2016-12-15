@@ -125,46 +125,6 @@ contributeToProject = function(address, amount) {
         })
 };
 
-
-
-function testing() {
-  //balance = web3.fromWei(web3.eth.getBalance(account), "ether");
-  //console.log(balance.plus(21).toString(10));
-
-  //var fh = FundingHub.deployed();
-    //creates deadline in the future
-    createProject(500000, 1640995200);
-    //creates deadline in the past
-    createProject(500000, 10995200);
-
-  /*fh.createProject(500000, 1640995200, { from: account, gas: 3000000 }).then(function (tx) {
-      return web3.eth.getTransactionReceiptMined(tx);
-  }).then(function (receipt) {
-          //console.log(receipt);
-      });
-*/
-
-
-
-    /*fh.getProjectCount.call().then(function(numOfProjects) {
-        var totalProjects = [];
-        for(i = 0; i < numOfProjects.valueOf(); i++) {
-            fh.getProject.call(i).then(function(a){
-                totalProjects[i] = {address: a[0], status: a[1]};
-                console.log(totalProjects[i]);
-            });
-        }
-    });*/
-
-
-    /*fh.getProject.call(1).then(function(a, status){
-      console.log(a);
-      console.log(status);
-    });*/
-
-
-}
-
 //
 window.onload = function() {
     initUtils(web3);
