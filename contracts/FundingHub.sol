@@ -1,5 +1,5 @@
 pragma solidity ^0.4.6;
-import "Project.sol";
+import "./Project.sol";
 
 contract FundingHub {
     // Simple mapping to track deployed projects

@@ -1,5 +1,5 @@
 pragma solidity ^0.4.6;
-import "ProjectLib.sol";
+import "./ProjectLib.sol";
 
 contract Project {
     //Tracks the address of the creator contract
