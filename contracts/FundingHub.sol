@@ -27,16 +27,16 @@ contract FundingHub {
     }
     //Calls Project.fund() which returns whether or not the deposit was successful and its status
     //Only FindingHub can call Project.fund()
-    function contribute(address a) payable returns (bool){
+    function contribute(address a)
+        payable {
         Project p = Project(a);
         //return false if project is no longer active
         if(p.getStatus() != ProjectLib.StatusType.Active) {
-            return false;
+             OnContribution(tx.origin, a, false);
         }
 
         var result = p.fund.value(msg.value)();
         OnContribution(tx.origin, a, result);
-        return result;
     }
 
     function getProjectCount()

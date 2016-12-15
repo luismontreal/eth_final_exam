@@ -1,4 +1,28 @@
 // From Xavier
+
+web3.eth.getTransactionReceiptMined = function (txnHash, interval) {
+    var transactionReceiptAsync;
+    interval = interval ? interval : 500;
+    transactionReceiptAsync = function(txnHash, resolve, reject) {
+        try {
+            var receipt = web3.eth.getTransactionReceipt(txnHash);
+            if (receipt == null) {
+                setTimeout(function () {
+                    transactionReceiptAsync(txnHash, resolve, reject);
+                }, interval);
+            } else {
+                resolve(receipt);
+            }
+        } catch(e) {
+            reject(e);
+        }
+    };
+
+    return new Promise(function (resolve, reject) {
+        transactionReceiptAsync(txnHash, resolve, reject);
+    });
+};
+
 var getEventsPromise = function (myFilter, count) {
     return new Promise(function (resolve, reject) {
         count = count ? count : 1;
@@ -72,53 +96,57 @@ contract('Project', function(accounts) {
             ]);
         })
             .then(function (e){
-                return Project.at(e[0][0].args.projectAddress).refund.call()
-                    .then(function(success){
+                return Project.at(e[0][0].args.projectAddress).refund.call({gas: 3000000 })})
+            .then(function(success){
                        assert.equal(success, false,"Contract has no balance nor contributors");
                         done();
                     });
-            });
+        });
 
-    });
 
-    //Create project for a short period of time, and contribute to it so we can test refunds in the last one
+    //Create project with deadline in seconds in the future need to use --blocktime=1 in TESTRPC
     //ID 2, to be used in next test
-    it("Should be able contribute", function(done) {
+    it("Should be able to be contributed", function(done) {
         var fh = FundingHub.deployed();
         blockNumber = web3.eth.blockNumber;
-        console.log(web3.eth.getBlock('latest').timestamp + 4);
 
-        fh.createProject(1000, web3.eth.getBlock('latest').timestamp + 15, {gas: 3000000 })
+        fh.createProject(1000, web3.eth.getBlock('latest').timestamp + 5, {gas: 3000000 })
             .then(function(tx) {
                 return Promise.all([
                     getEventsPromise(fh.OnCreatedProject({projectOwner: accounts[0]}))
                 ]);
             })
             .then(function (e) {
-                 return FundingHub.deployed().contribute.call(e[0][0].args.projectAddress, {from: accounts[0], value: 50,gas:3000000})
+                return Promise.all([
+                    //OnContribution(tx.origin, a, false);
+                    getEventsPromise(fh.OnContribution({contributor: accounts[0]})),
+                    FundingHub.deployed().contribute(e[0][0].args.projectAddress, {from: accounts[0], value: 50,gas:3000000})
+                ]);
             })
-            .then(function(success) {
-                assert.equal(success, true, "Can contribute");
+            .then(function(myPromise) {
+                assert.equal(myPromise[0][0].args.result, true, "Can contribute");
+                //Some delay here to generate some blocks
+                setTimeout(done, 8000);
         });
     });
 
     it("Should be able to get refunded", function(done) {
         var fh = FundingHub.deployed();
-        console.log(web3.eth.getBlock('latest').timestamp);
-        //console.log(Math.round(new Date().getTime()/1000));
 
-        fh.getProject.call(1)
-            .then(function (values) {
-                return Project.at(values[0]);
-            }).then(function (activeProject) {
-            return activeProject.refund.call()
-                .then(function(success){
-                    assert.equal(success, true,"Was refunded");
-                    //Wait some time before next test
-                    setTimeout(done, 60000);
+            fh.getProject.call(2)
+                .then(function (values) {
+                    //console.log(values[1].valueOf()); //status 1 is refund
+                    //console.log('balance: ' + values[2].valueOf()); //dealine
+                    //console.log(accounts[0]);
+                    //console.log(web3.eth.getBlock('latest').timestamp); //current timestamp
+                    return Project.at(values[0]);
+                })
+                .then(function (activeProject) {
+                    return activeProject.refund.call({gas: 3000000 })
+                })
+                .then(function (success) {
+                    assert.equal(success, true, "Was refunded");
+                        done();
                 });
-        });
-
-
     });
 });

@@ -38,7 +38,7 @@ contract Project {
 	    }
 
 	    //If we made it here is because contribution is still Active
-        contributionRecord[tx.origin] = msg.value;
+        contributionRecord[tx.origin] += msg.value; // += so tracking many contributions per user
 	    numOfContributions++;
 
         //Did we achieve the goal in Wei?
@@ -73,7 +73,7 @@ contract Project {
 	}
 
 	function refund()
-	    returns (bool result) {
+	    returns (bool) {
 	    //Here we can only check if deadline is met, the goal wasn't achieved and we haven't payout
 	    if (getStatus() != ProjectLib.StatusType.Refund) {
 	        throw;
