@@ -1,3 +1,24 @@
+// From Xavier
+var getEventsPromise = function (myFilter, count) {
+    return new Promise(function (resolve, reject) {
+        count = count ? count : 1;
+        var results = [];
+        myFilter.watch(function (error, result) {
+            if (error) {
+                reject(error);
+            } else {
+                count--;
+                results.push(result);
+            }
+            if (count <= 0) {
+                resolve(results);
+                myFilter.stopWatching();
+            }
+        });
+    });
+};
+
+
 var expectedExceptionPromise = function (action, gasToUse) {
     return new Promise(function (resolve, reject) {
         try {
@@ -32,7 +53,7 @@ contract('Project', function(accounts) {
                 return Project.at(values[0]);
             }).then(function (activeProject) {
                     return expectedExceptionPromise(function () {
-                        return activeProject.refund.call({ from: accounts[1], gas: 3000000 });
+                        return activeProject.refund.call({ from: accounts[0], gas: 3000000 });
                     },
                     3000000);
             });
@@ -40,71 +61,22 @@ contract('Project', function(accounts) {
 
     });
 
-    /*it("Should refund only on Refund status", function() {
+    //I create a project in the past with no balance
+    it("Should refund only if address had contributed and there's available balance", function() {
         var fh = FundingHub.deployed();
-        //getting my first project which I know is active
-        fh.getProject.call(0)
-            .then(function (values) {
-                return Project.at(values[0]).refund();
-            }).then(function (fail) {
-                //Status 1 is Refund, see ProjectLib.sol
-                assert.equal(fail, 1, "Project Must start at Active Status");
-        });*/
+        blockNumber = web3.eth.blockNumber + 1;
+        //Creating project in the past (to test refund), this is ID 1
+        fh.createProject(1000, 1, {gas: 3000000 }).then(function() {
+            return Promise.all([
+                getEventsPromise(fh.OnCreatedProject({projectOwner: accounts[0]}))
+            ]);
+        })
+            .then(function (e){
+                return Project.at(e[0][0].args.projectAddress).refund.call()
+                    .then(function(success){
+                        assert.equal(success, false,"Contract has no balance nor contributors");
+                    });
+            });
 
-        /*return meta.getBalance.call(accounts[0]).then(function(balance) {
-            assert.equal(balance.valueOf(), 10000, "10000 wasn't in the first account");
-        });
-    });*/
-
-
-
-
-    /*it("should call a function that depends on a linked library  ", function(){
-        var meta = MetaCoin.deployed();
-        var metaCoinBalance;
-        var metaCoinEthBalance;
-
-        return meta.getBalance.call(accounts[0]).then(function(outCoinBalance){
-            metaCoinBalance = outCoinBalance.toNumber();
-            return meta.getBalanceInEth.call(accounts[0]);
-        }).then(function(outCoinBalanceEth){
-            metaCoinEthBalance = outCoinBalanceEth.toNumber();
-
-        }).then(function(){
-            assert.equal(metaCoinEthBalance,2*metaCoinBalance,"Library function returned unexpeced function, linkage may be broken");
-
-        });
     });
-    it("should send coin correctly", function() {
-        var meta = MetaCoin.deployed();
-
-        // Get initial balances of first and second account.
-        var account_one = accounts[0];
-        var account_two = accounts[1];
-
-        var account_one_starting_balance;
-        var account_two_starting_balance;
-        var account_one_ending_balance;
-        var account_two_ending_balance;
-
-        var amount = 10;
-
-        return meta.getBalance.call(account_one).then(function(balance) {
-            account_one_starting_balance = balance.toNumber();
-            return meta.getBalance.call(account_two);
-        }).then(function(balance) {
-            account_two_starting_balance = balance.toNumber();
-            return meta.sendCoin(account_two, amount, {from: account_one});
-        }).then(function() {
-            return meta.getBalance.call(account_one);
-        }).then(function(balance) {
-            account_one_ending_balance = balance.toNumber();
-            return meta.getBalance.call(account_two);
-        }).then(function(balance) {
-            account_two_ending_balance = balance.toNumber();
-
-            assert.equal(account_one_ending_balance, account_one_starting_balance - amount, "Amount wasn't correctly taken from the sender");
-            assert.equal(account_two_ending_balance, account_two_starting_balance + amount, "Amount wasn't correctly sent to the receiver");
-        });
-    });*/
 });
