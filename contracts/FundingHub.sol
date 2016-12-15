@@ -17,7 +17,9 @@ contract FundingHub {
     // Deploys a new "Project" and we save the address
     // The transaction originator will be the owner
     function createProject(uint amountGoal, uint deadline) {
-        if (amountGoal > 0  && deadline > now) {
+        //commenting first check so I can submit projects in the past and test the refund function
+        //if (amountGoal > 0  && deadline > now) {
+        if(amountGoal > 0) {
             deployedProjects[numOfProjects] = new Project(amountGoal, deadline);
             OnCreatedProject(tx.origin, deployedProjects[numOfProjects]);
             numOfProjects++;

@@ -1,12 +1,65 @@
-contract('MetaCoin', function(accounts) {
-    it("should put 10000 MetaCoin in the first account", function() {
-        var meta = MetaCoin.deployed();
+var expectedExceptionPromise = function (action, gasToUse) {
+    return new Promise(function (resolve, reject) {
+        try {
+            resolve(action());
+        } catch(e) {
+            reject(e);
+        }
+    })
+        .then(function (txn) {
+            return web3.eth.getTransactionReceiptMined(txn);
+        })
+        .then(function (receipt) {
+            // We are in Geth
+            assert.equal(receipt.gasUsed, gasToUse, "should have used all the gas");
+        })
+        .catch(function (e) {
+            if ((e + "").indexOf("invalid JUMP") > -1) {
+                // We are in TestRPC
+            } else {
+                throw e;
+            }
+        });
+};
 
-        return meta.getBalance.call(accounts[0]).then(function(balance) {
+//I get the project deployed in 3_create_project, which I know is active
+contract('Project', function(accounts) {
+    it("Should fail when project is not in Refund status", function() {
+        var fh = FundingHub.deployed();
+
+        fh.getProject.call(0)
+            .then(function (values) {
+                return Project.at(values[0]);
+            }).then(function (activeProject) {
+                    return expectedExceptionPromise(function () {
+                        return activeProject.refund.call({ from: accounts[1], gas: 3000000 });
+                    },
+                    3000000);
+            });
+
+
+    });
+
+    /*it("Should refund only on Refund status", function() {
+        var fh = FundingHub.deployed();
+        //getting my first project which I know is active
+        fh.getProject.call(0)
+            .then(function (values) {
+                return Project.at(values[0]).refund();
+            }).then(function (fail) {
+                //Status 1 is Refund, see ProjectLib.sol
+                assert.equal(fail, 1, "Project Must start at Active Status");
+        });*/
+
+        /*return meta.getBalance.call(accounts[0]).then(function(balance) {
             assert.equal(balance.valueOf(), 10000, "10000 wasn't in the first account");
         });
-    });
-    it("should call a function that depends on a linked library  ", function(){
+    });*/
+
+
+
+
+    /*it("should call a function that depends on a linked library  ", function(){
         var meta = MetaCoin.deployed();
         var metaCoinBalance;
         var metaCoinEthBalance;
@@ -53,5 +106,5 @@ contract('MetaCoin', function(accounts) {
             assert.equal(account_one_ending_balance, account_one_starting_balance - amount, "Amount wasn't correctly taken from the sender");
             assert.equal(account_two_ending_balance, account_two_starting_balance + amount, "Amount wasn't correctly sent to the receiver");
         });
-    });
+    });*/
 });

@@ -4,7 +4,7 @@ var allProjects = [];
 
 var initUtils = function (web3) {
 
-    // Found here https://gist.github.com/xavierlepretre/88682e871f4ad07be4534ae560692ee6
+    // Gist from Xavier
     web3.eth.getTransactionReceiptMined = function (txnHash, interval) {
         var transactionReceiptAsync;
         interval = interval ? interval : 500;
@@ -29,7 +29,7 @@ var initUtils = function (web3) {
     };
 
 };
-
+//Updates the user
 function setStatus(message) {
     var status = document.getElementById("status");
     status.innerHTML = message;
@@ -95,6 +95,7 @@ getListOfProjects = function() {
         })
 };
 
+//Creates new project
 createProject = function(amount, deadline) {
     //I'm aware that getting timestamp from JS is a bad idea
     deadlineTimeStamp = Math.floor((new Date()).getTime() / 1000) + (86400 * deadline);
@@ -115,6 +116,7 @@ createProject = function(amount, deadline) {
     });
 };
 
+//Contributes to project
 contributeToProject = function(address, amount) {
     console.log(FundingHub.deployed());
     FundingHub.deployed().contribute(address, {from: account, value: amount,gas:3000000})
@@ -125,7 +127,7 @@ contributeToProject = function(address, amount) {
         })
 };
 
-//
+
 window.onload = function() {
     initUtils(web3);
   web3.eth.getAccounts(function(err, accs) {
@@ -142,7 +144,6 @@ window.onload = function() {
     accounts = accs;
     account = accounts[0];
 
-    //testing();
     getListOfProjects();
 
   });
