@@ -4,10 +4,7 @@
 <html>
 <head>
   <title>FundingHub</title>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-  <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.2/jsgrid.min.css" />
-  <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.2/jsgrid-theme.min.css" />
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.2/jsgrid.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
   <link href="./app.css" rel='stylesheet' type='text/css'>
@@ -18,19 +15,29 @@
   <p id="status" style="color:blue"></p>
   <br>
   <h1>Create Project</h1>
-  <br><label for="amount">Amount Goal:</label><input type="text" id="amount" placeholder="e.g., 95"></input>
-  <br><label for="receiver">Deadline:</label><input type="text" id="receiver" placeholder="e.g., 0x93e66d9baea28c17d9fc393b53e3fbdd76899dae"></input>
-  <br><br><button id="send" onclick="sendCoin()">Create</button>
+  <br><label for="amount">Amount Goal (Wei):</label><input type="text" id="amount" placeholder="e.g., 95"></input>
+  <br><label for="deadline">Deadline (days in the future):</label><input type="text" id="deadline" placeholder="e.g., 30 "></input>
+  <br><br><button id="create" onclick="createProject(document.getElementById('amount').value, document.getElementById('deadline').value)">Create</button>
   <br><br>
 
   <br>
   <h1>Contribute</h1>
-  <br><label for="amount">Amount:</label><input type="text" id="amount" placeholder="e.g., 95"></input>
-  <br><label for="receiver">Project</label><input type="text" id="receiver" placeholder="e.g., 0x93e66d9baea28c17d9fc393b53e3fbdd76899dae"></input>
-  <br><br><button id="send" onclick="sendCoin()">Contribute</button>
+  <br><label for="address">Project Address:</label><input type="text" id="address" placeholder="address from below"></input>
+  <br><label for="contribution">Contribution (Wei)</label><input type="text" id="contribution" placeholder="e.g. 55"></input>
+  <br><br><button id="fund" onclick="contributeToProject(document.getElementById('address').value, document.getElementById('contribution').value)">Contribute</button>
   <br><br>
 
-  <div id="jsGrid"></div>
+  <table id="table" class="table"><thead>
+  <tr>
+    <th>Address</th>
+    <th>Status</th>
+    <th>Balance</th>
+    <th>Owner</th>
+    <th>Goal</th>
+    <th>deadline</th>
+  </tr>
+
+  </table>
 
 </body>
 </html>

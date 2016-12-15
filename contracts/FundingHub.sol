@@ -17,9 +17,11 @@ contract FundingHub {
     // Deploys a new "Project" and we save the address
     // The transaction originator will be the owner
     function createProject(uint amountGoal, uint deadline) {
-        deployedProjects[numOfProjects] = new Project(amountGoal, deadline);
-        OnCreatedProject(tx.origin, deployedProjects[numOfProjects]);
-        numOfProjects++;
+        if (amountGoal > 0  && deadline > now) {
+            deployedProjects[numOfProjects] = new Project(amountGoal, deadline);
+            OnCreatedProject(tx.origin, deployedProjects[numOfProjects]);
+            numOfProjects++;
+        }
     }
     //Calls Project.fund() which returns whether or not the deposit was successful and its status
     //Only FindingHub can call Project.fund()
@@ -42,9 +44,9 @@ contract FundingHub {
 
     function getProject(uint id)
         constant
-        returns (address a, ProjectLib.StatusType status) {
+        returns (address, ProjectLib.StatusType, uint, address, uint, uint) {
         Project p = deployedProjects[id];
-        return (p, p.getStatus());
+        return (p, p.getStatus(), p.balance, p.getOwner(), p.getGoal(), p.getDeadline());
     }
 
 }

@@ -122,6 +122,24 @@ contract Project {
             return ProjectLib.StatusType.Active;
     }
 
+    function getOwner()
+                constant
+        	    returns (address) {
+        	    return pi.owner;
+    }
+
+    function getGoal()
+                constant
+            	returns (uint) {
+            	return pi.amountGoalInWei;
+    }
+
+    function getDeadline()
+                constant
+                returns (uint) {
+                return pi.deadline;
+    }
+
     //Defining fallback, contract not meant to receive ether here, only from fund()
     function() {}
 

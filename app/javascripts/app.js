@@ -30,7 +30,6 @@ var initUtils = function (web3) {
 
 };
 
-
 function setStatus(message) {
     var status = document.getElementById("status");
     status.innerHTML = message;
@@ -40,16 +39,53 @@ function setStatus(message) {
 getListOfProjects = function() {
     FundingHub.deployed().getProjectCount.call()
         .then(function (count) {
-            console.log(count.valueOf());
+            //console.log(count.valueOf());
+            var theTable = document.getElementById('table');
+
             if (count.valueOf() > 0) {
                 for (var i = 0; i < count.valueOf(); i++) {
                     FundingHub.deployed().getProject.call(i)
                         .then(function (values) {
                             allProjects.push ({
                                 address: values[0],
-                                status: values[1]
+                                status: values[1],
+                                balance: values[2],
+                                owner: values[3],
+                                goal: values[4],
+                                deadline: values[5],
                             });
-                            // draw table here?
+
+                            if (values[1].valueOf() == 0) {
+                                statusString = "Active";
+                            } else if (values[1].valueOf() == 1) {
+                                statusString = "Refunding";
+                            } else if (values[1].valueOf() == 2) {
+                                statusString = "Achieved";
+                            } else {
+                                statusString = "Paid Out";
+                            }
+
+                            tr = document.createElement('tr');
+                            td = document.createElement('td');
+                            td2 = document.createElement('td');
+                            td3 = document.createElement('td');
+                            td4 = document.createElement('td');
+                            td5 = document.createElement('td');
+                            td6 = document.createElement('td');
+                            td.appendChild(document.createTextNode(values[0]));
+                            td2.appendChild(document.createTextNode(statusString));
+                            td3.appendChild(document.createTextNode(values[2]));
+                            td4.appendChild(document.createTextNode(values[3]));
+                            td5.appendChild(document.createTextNode(values[4]));
+                            td6.appendChild(document.createTextNode(values[5]));
+                            tr.appendChild(td);
+                            tr.appendChild(td2);
+                            tr.appendChild(td3);
+                            tr.appendChild(td4);
+                            tr.appendChild(td5);
+                            tr.appendChild(td6);
+                            theTable.appendChild(tr);
+
                         })
                         .catch(function (e) {
                             console.error(e);
@@ -60,7 +96,9 @@ getListOfProjects = function() {
 };
 
 createProject = function(amount, deadline) {
-    FundingHub.deployed().createProject(amount, deadline, { from: account, gas: 3000000 })
+    //I'm aware that getting timestamp from JS is a bad idea
+    deadlineTimeStamp = Math.floor((new Date()).getTime() / 1000) + (86400 * deadline);
+    FundingHub.deployed().createProject(amount, deadlineTimeStamp, { from: account, gas: 3000000 })
         .then(function (tx) {
             return web3.eth.getTransactionReceiptMined(tx);
     }).then(function (receipt) {
@@ -77,6 +115,16 @@ createProject = function(amount, deadline) {
     });
 };
 
+contributeToProject = function(address, amount) {
+    console.log(FundingHub.deployed());
+    FundingHub.deployed().contribute(address, {from: account, value: amount,gas:3000000})
+        .then(function (tx) {
+            return web3.eth.getTransactionReceiptMined(tx);
+        }).then(function (receipt) {
+            setStatus('Transaction Hash:' + receipt.transactionHash);
+        })
+};
+
 
 
 function testing() {
@@ -84,8 +132,10 @@ function testing() {
   //console.log(balance.plus(21).toString(10));
 
   //var fh = FundingHub.deployed();
-
+    //creates deadline in the future
     createProject(500000, 1640995200);
+    //creates deadline in the past
+    createProject(500000, 10995200);
 
   /*fh.createProject(500000, 1640995200, { from: account, gas: 3000000 }).then(function (tx) {
       return web3.eth.getTransactionReceiptMined(tx);
@@ -132,7 +182,8 @@ window.onload = function() {
     accounts = accs;
     account = accounts[0];
 
-    getListOfProjects();
     //testing();
+    getListOfProjects();
+
   });
 }
