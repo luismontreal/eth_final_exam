@@ -86,7 +86,7 @@ contract('Project', function(accounts) {
     });
 
     //I create a project in the past with no balance, ID 1
-    it("Should fail id sender hasn't contributed or there's no balance", function(done) {
+    it("Should fail if sender hasn't contributed or there's no balance", function(done) {
         var fh = FundingHub.deployed();
         blockNumber = web3.eth.blockNumber + 1;
         //Creating project in the past (to test refund), this is ID 1
