@@ -125,7 +125,7 @@ contract('Project', function(accounts) {
             })
             .then(function(myPromise) {
                 assert.equal(myPromise[0][0].args.result, true, "Can contribute");
-                //Some delay here to generate some blocks
+                //Some delay here to generate some blocks an be able to expire contract ID 2
                 setTimeout(done, 8000);
         });
     });
