@@ -129,7 +129,7 @@ contract('Project', function(accounts) {
                 setTimeout(done, 8000);
         });
     });
-
+    //Project created in the last test should be expired by now
     it("Should be able to get refunded", function(done) {
         var fh = FundingHub.deployed();
 
